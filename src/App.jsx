@@ -4,6 +4,7 @@ import { useState } from "react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
 import ImageContainer from "./components/ImageContainer";
+import FlyImage from "./components/FlyImage";
 import { searchMixcloud } from "./api";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
     setResults(data);
     setLoading(false);
     setSelectedTrack(null);
+    setPlayTrack(false);
   };
 
   const changeView = (newView) => {
@@ -48,36 +50,13 @@ function App() {
     setResults(data);
     setLoading(false);
     setSelectedTrack(null);
+    setPlayTrack(false);
   };
 
   return (
     <Box bg="gray.100" minH="100vh" p={6}>
       {/* Flying image animation */}
-      {flyImage && (
-        <motion.img
-          src={flyImage.src}
-          initial={{
-            position: "fixed",
-            top: flyImage.top,
-            left: flyImage.left,
-            width: flyImage.width,
-            height: flyImage.height,
-            zIndex: 1000,
-            borderRadius: "8px",
-          }}
-          animate={{
-            top: 200,
-            left: "50%",
-            x: "-50%",
-            width: 300,
-            height: 300,
-            opacity: 0,
-          }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
-          onAnimationComplete={() => setFlyImage(null)}
-          style={{ pointerEvents: "none" }}
-        />
-      )}
+      {flyImage && <FlyImage flyImage={flyImage} onComplete={() => setFlyImage(null)} />}
 
       {/* Three-column layout */}
       <Grid
@@ -116,7 +95,7 @@ function App() {
                   view={view}
                   onSelect={(track) => {
                     setSelectedTrack(track);
-                    setPlayTrack(true);
+                    setPlayTrack(false);
                   }}
                   onFly={(imageData) => setFlyImage(imageData)}
                 />
