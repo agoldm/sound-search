@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Container, Heading, VStack, Spinner, Button } from "@chakra-ui/react";
+import { Container, Heading, VStack, Spinner, Button, Box, Text, HStack} from "@chakra-ui/react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
 import { searchMixcloud } from "./api";
-import { HStack } from "@chakra-ui/react";
 import ImageContainer from "./components/ImageContainer";
 
 function App() {
@@ -16,14 +15,27 @@ function App() {
   const [view, setView] = useState(() => {
     return localStorage.getItem("sound_search_view") || "list";
   });
+  const [recentSearches, setRecentSearches] = useState(() => {
+    const saved = localStorage.getItem("recent_searches");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const handleSearch = async (newQuery) => {
     setQuery(newQuery);
     setOffset(0);
     setLoading(true);
+
+    // Save new recent search
+    setRecentSearches((prev) => {
+      const updated = [newQuery, ...prev.filter((q) => q !== newQuery)].slice(0, 5);
+      localStorage.setItem("recent_searches", JSON.stringify(updated));
+      return updated;
+    });
+
     const data = await searchMixcloud(newQuery, 0);
     setResults(data);
     setLoading(false);
+    setSelectedTrack(null);
   };
 
   const changeView = (newView) => {
@@ -71,7 +83,7 @@ function App() {
               view={view}
               onSelect={(track) => {
                 setSelectedTrack(track);
-                setPlayTrack(true); 
+                setPlayTrack(true);
               }} />
             {view === "list" && (
               <ImageContainer
@@ -86,6 +98,24 @@ function App() {
               </Button>
             )}
           </>
+        )}
+        
+        {recentSearches.length > 0 && (
+          <Box>
+            <Text fontWeight="bold" mb={2}>Recent Searches:</Text>
+            <HStack spacing={2} wrap="wrap">
+              {recentSearches.map((item) => (
+                <Button
+                  key={item}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleSearch(item)}
+                >
+                  {item}
+                </Button>
+              ))}
+            </HStack>
+          </Box>
         )}
       </VStack>
     </Container>
