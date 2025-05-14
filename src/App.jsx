@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Container, Heading, VStack, Spinner, Button, Box, Text, HStack} from "@chakra-ui/react";
+import { Container, Heading, VStack, Spinner, Button, Box, Text, HStack } from "@chakra-ui/react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
 import { searchMixcloud } from "./api";
@@ -11,6 +11,7 @@ function App() {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [flyImage, setFlyImage] = useState(null);
   const [playTrack, setPlayTrack] = useState(false);
   const [view, setView] = useState(() => {
     return localStorage.getItem("sound_search_view") || "list";
@@ -55,11 +56,38 @@ function App() {
 
   return (
     <Container maxW="container.md" py={6}>
+      {flyImage && (
+        <motion.img
+          src={flyImage.src}
+          initial={{
+            position: "fixed",
+            top: flyImage.top,
+            left: flyImage.left,
+            width: flyImage.width,
+            height: flyImage.height,
+            zIndex: 1000,
+            borderRadius: "8px",
+          }}
+          animate={{
+            top: 200, 
+            left: "50%",
+            x: "-50%",
+            width: 300,
+            height: 300,
+            opacity: 0,
+          }}
+          transition={{ duration: 0.7, ease: "easeInOut" }}
+          onAnimationComplete={() => setFlyImage(null)}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
       <VStack spacing={6} align="stretch">
         <Heading>Sound Search</Heading>
-
+        
+        // Search bar
         <SearchBar onSearch={handleSearch} />
 
+        // List or Tile buttons
         <HStack spacing={4} justify="center">
           <Button
             colorScheme={view === "list" ? "blue" : "gray"}
@@ -78,13 +106,16 @@ function App() {
           <Spinner alignSelf="center" />
         ) : (
           <>
+            // Search results
             <SearchResults
               results={results}
               view={view}
               onSelect={(track) => {
                 setSelectedTrack(track);
                 setPlayTrack(false);
-              }} />
+              }}
+              onFly={(imageData) => setFlyImage(imageData)}
+            />
             {view === "list" && (
               <ImageContainer
                 track={selectedTrack}
@@ -100,6 +131,7 @@ function App() {
           </>
         )}
 
+        // Recent results
         {recentSearches.length > 0 && (
           <Box>
             <Text fontWeight="bold" mb={2}>Recent Searches:</Text>
