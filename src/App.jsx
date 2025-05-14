@@ -1,35 +1,86 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { Container, Heading, VStack, Spinner, Button } from "@chakra-ui/react";
+import SearchBar from "./components/SearchBar";
+import SearchResults from "./components/SearchResults";
+import { searchMixcloud } from "./api";
+import { HStack } from "@chakra-ui/react";
+import ImageContainer from "./components/ImageContainer";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [view, setView] = useState("list");
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [playTrack, setPlayTrack] = useState(false);
+
+  const handleSearch = async (newQuery) => {
+    setQuery(newQuery);
+    setOffset(0);
+    setLoading(true);
+    const data = await searchMixcloud(newQuery, 0);
+    setResults(data);
+    setLoading(false);
+  };
+
+  const handleNext = async () => {
+    const newOffset = offset + 6;
+    setOffset(newOffset);
+    setLoading(true);
+    const data = await searchMixcloud(query, newOffset);
+    setResults(data);
+    setLoading(false);
+    setSelectedTrack(null);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Container maxW="container.md" py={6}>
+      <VStack spacing={6} align="stretch">
+        <Heading>Sound Search</Heading>
+        <SearchBar onSearch={handleSearch} />
+        <HStack spacing={4} justify="center">
+          <Button
+            colorScheme={view === "list" ? "blue" : "gray"}
+            onClick={() => setView("list")}
+          >
+            List View
+          </Button>
+          <Button
+            colorScheme={view === "tile" ? "blue" : "gray"}
+            onClick={() => setView("tile")}
+          >
+            Tile View
+          </Button>
+        </HStack>
+        {loading ? (
+          <Spinner alignSelf="center" />
+        ) : (
+          <>
+            <SearchResults
+              results={results}
+              view={view}
+              onSelect={(track) => {
+                setSelectedTrack(track);
+                setPlayTrack(true); 
+              }} />
+            {view === "list" && (
+              <ImageContainer
+                track={selectedTrack}
+                playTrack={playTrack}
+                onPlayClick={() => setPlayTrack(true)}
+              />
+            )}
+            {results.length === 6 && (
+              <Button onClick={handleNext} colorScheme="blue">
+                Next
+              </Button>
+            )}
+          </>
+        )}
+      </VStack>
+    </Container>
+  );
 }
 
-export default App
+export default App;
