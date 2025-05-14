@@ -1,7 +1,7 @@
 import { Box, Text } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const MotionBox = motion.create(Box);
+const MotionBox = motion(Box);
 const MotionImage = motion.img;
 
 export default function ImageContainer({ track, playTrack, onPlayClick }) {
@@ -18,12 +18,14 @@ export default function ImageContainer({ track, playTrack, onPlayClick }) {
         {!track ? (
           <MotionBox
             key="placeholder"
-            textAlign="center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             color="gray.500"
-            borderWidth="1px"
+            fontSize="lg"
             borderStyle="dashed"
             borderRadius="md"
-            p={4}
+            p={6}
           >
             🎵 No track selected
           </MotionBox>
@@ -47,6 +49,7 @@ export default function ImageContainer({ track, playTrack, onPlayClick }) {
               whileHover={{ scale: 1.02 }}
               onClick={onPlayClick}
             />
+
             <Text fontWeight="bold" mb={2}>
               {track.name}
             </Text>

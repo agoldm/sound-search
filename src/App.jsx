@@ -83,7 +83,7 @@ function App() {
               view={view}
               onSelect={(track) => {
                 setSelectedTrack(track);
-                setPlayTrack(true);
+                setPlayTrack(false);
               }} />
             {view === "list" && (
               <ImageContainer
@@ -99,7 +99,7 @@ function App() {
             )}
           </>
         )}
-        
+
         {recentSearches.length > 0 && (
           <Box>
             <Text fontWeight="bold" mb={2}>Recent Searches:</Text>
