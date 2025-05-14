@@ -1,9 +1,10 @@
+import { Box, Grid, GridItem, Heading, VStack, Spinner, Button, HStack, } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import { useState } from "react";
-import { Container, Heading, VStack, Spinner, Button, Box, Text, HStack } from "@chakra-ui/react";
 import SearchBar from "./components/SearchBar";
 import SearchResults from "./components/SearchResults";
-import { searchMixcloud } from "./api";
 import ImageContainer from "./components/ImageContainer";
+import { searchMixcloud } from "./api";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -13,9 +14,7 @@ function App() {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [flyImage, setFlyImage] = useState(null);
   const [playTrack, setPlayTrack] = useState(false);
-  const [view, setView] = useState(() => {
-    return localStorage.getItem("sound_search_view") || "list";
-  });
+  const [view, setView] = useState(() => localStorage.getItem("sound_search_view") || "list");
   const [recentSearches, setRecentSearches] = useState(() => {
     const saved = localStorage.getItem("recent_searches");
     return saved ? JSON.parse(saved) : [];
@@ -26,12 +25,9 @@ function App() {
     setOffset(0);
     setLoading(true);
 
-    // Save new recent search
-    setRecentSearches((prev) => {
-      const updated = [newQuery, ...prev.filter((q) => q !== newQuery)].slice(0, 5);
-      localStorage.setItem("recent_searches", JSON.stringify(updated));
-      return updated;
-    });
+    const updated = [newQuery, ...recentSearches.filter((q) => q !== newQuery)].slice(0, 5);
+    localStorage.setItem("recent_searches", JSON.stringify(updated));
+    setRecentSearches(updated);
 
     const data = await searchMixcloud(newQuery, 0);
     setResults(data);
@@ -55,7 +51,8 @@ function App() {
   };
 
   return (
-    <Container maxW="container.md" py={6}>
+    <Box bg="gray.100" minH="100vh" p={6}>
+      {/* Flying image animation */}
       {flyImage && (
         <motion.img
           src={flyImage.src}
@@ -69,7 +66,7 @@ function App() {
             borderRadius: "8px",
           }}
           animate={{
-            top: 200, 
+            top: 200,
             left: "50%",
             x: "-50%",
             width: 300,
@@ -81,61 +78,74 @@ function App() {
           style={{ pointerEvents: "none" }}
         />
       )}
-      <VStack spacing={6} align="stretch">
-        <Heading>Sound Search</Heading>
-        
-        // Search bar
-        <SearchBar onSearch={handleSearch} />
 
-        // List or Tile buttons
-        <HStack spacing={4} justify="center">
-          <Button
-            colorScheme={view === "list" ? "blue" : "gray"}
-            onClick={() => changeView("list")}
-          >
-            List View
-          </Button>
-          <Button
-            colorScheme={view === "tile" ? "blue" : "gray"}
-            onClick={() => changeView("tile")}
-          >
-            Tile View
-          </Button>
-        </HStack>
-        {loading ? (
-          <Spinner alignSelf="center" />
-        ) : (
-          <>
-            // Search results
-            <SearchResults
-              results={results}
-              view={view}
-              onSelect={(track) => {
-                setSelectedTrack(track);
-                setPlayTrack(false);
-              }}
-              onFly={(imageData) => setFlyImage(imageData)}
-            />
-            {view === "list" && (
-              <ImageContainer
-                track={selectedTrack}
-                playTrack={playTrack}
-                onPlayClick={() => setPlayTrack(true)}
-              />
-            )}
-            {results.length === 6 && (
-              <Button onClick={handleNext} colorScheme="blue">
-                Next
+      {/* Three-column layout */}
+      <Grid
+        templateColumns={{ base: "1fr", md: "1fr 2fr 1fr" }}
+        gap={6}
+        maxW="1200px"
+        mx="auto"
+      >
+        {/* Left: Search + Results + Buttons */}
+        <GridItem>
+          <VStack align="stretch" spacing={4}>
+            <Heading size="md">Sound Search</Heading>
+            <SearchBar onSearch={handleSearch} />
+
+            <HStack spacing={4} justify="center">
+              <Button
+                colorScheme={view === "list" ? "blue" : "gray"}
+                onClick={() => changeView("list")}
+              >
+                List
               </Button>
-            )}
-          </>
-        )}
+              <Button
+                colorScheme={view === "tile" ? "blue" : "gray"}
+                onClick={() => changeView("tile")}
+              >
+                Tile
+              </Button>
+            </HStack>
 
-        // Recent results
-        {recentSearches.length > 0 && (
-          <Box>
-            <Text fontWeight="bold" mb={2}>Recent Searches:</Text>
-            <HStack spacing={2} wrap="wrap">
+            {loading ? (
+              <Spinner alignSelf="center" />
+            ) : (
+              <>
+                <SearchResults
+                  results={results}
+                  view={view}
+                  onSelect={(track) => {
+                    setSelectedTrack(track);
+                    setPlayTrack(true);
+                  }}
+                  onFly={(imageData) => setFlyImage(imageData)}
+                />
+
+                {results.length === 6 && (
+                  <Button onClick={handleNext} colorScheme="blue">
+                    Next
+                  </Button>
+                )}
+              </>
+            )}
+          </VStack>
+        </GridItem>
+
+        {/* Center: Image container */}
+        <GridItem>
+          <Heading size="md" mb={4}>Now Playing</Heading>
+          <ImageContainer
+            track={selectedTrack}
+            playTrack={playTrack}
+            onPlayClick={() => setPlayTrack(true)}
+          />
+        </GridItem>
+
+        {/* Right: Recent Searches */}
+        <GridItem>
+          <Box borderWidth="1px" borderRadius="md" p={4} bg="white">
+            <Heading size="sm" mb={2}>Recent Searches</Heading>
+            <VStack spacing={2} align="stretch">
               {recentSearches.map((item) => (
                 <Button
                   key={item}
@@ -146,11 +156,11 @@ function App() {
                   {item}
                 </Button>
               ))}
-            </HStack>
+            </VStack>
           </Box>
-        )}
-      </VStack>
-    </Container>
+        </GridItem>
+      </Grid>
+    </Box>
   );
 }
 

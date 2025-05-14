@@ -7,11 +7,8 @@ import {
   HStack,
   Button,
 } from "@chakra-ui/react";
-import TrackPlayer from "./TrackPlayer";
-import { useState } from "react";
 
 export default function SearchResults({ results, view, onSelect }) {
-  const [playingTrackId, setPlayingTrackId] = useState(null);
 
   if (view === "tile") {
     return (
@@ -30,9 +27,9 @@ export default function SearchResults({ results, view, onSelect }) {
               <Image
                 src={item.pictures?.medium}
                 alt={item.name}
-                width="100%"
-                height="200px"
+                aspectRatio={1}
                 objectFit="cover"
+                width="100%"
                 borderRadius="md"
               />
               <Text mt={2} fontWeight="bold">
@@ -42,28 +39,13 @@ export default function SearchResults({ results, view, onSelect }) {
                 mt={2}
                 colorScheme="blue"
                 size="sm"
-                onClick={() => setPlayingTrackId(item.key)}
+                onClick={() => onSelect(item)}
               >
                 ▶ Play
               </Button>
-
-              {playingTrackId === item.key && <TrackPlayer track={item} />}
             </Box>
           ))}
         </SimpleGrid>
-
-        {playingTrackId === null && (
-          <Box
-            textAlign="center"
-            color="gray.500"
-            borderWidth="1px"
-            borderStyle="dashed"
-            borderRadius="md"
-            p={4}
-          >
-            🎵 No track selected
-          </Box>
-        )}
       </VStack>
     );
   }
