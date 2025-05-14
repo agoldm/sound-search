@@ -18,14 +18,12 @@ export default function ImageContainer({ track, playTrack, onPlayClick }) {
         {!track ? (
           <MotionBox
             key="placeholder"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            textAlign="center"
             color="gray.500"
-            fontSize="lg"
+            borderWidth="1px"
             borderStyle="dashed"
             borderRadius="md"
-            p={6}
+            p={4}
           >
             🎵 No track selected
           </MotionBox>

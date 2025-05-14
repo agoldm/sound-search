@@ -13,48 +13,62 @@ import { useState } from "react";
 export default function SearchResults({ results, view, onSelect }) {
   const [playingTrackId, setPlayingTrackId] = useState(null);
 
-  // Tile view
   if (view === "tile") {
     return (
-      <SimpleGrid columns={[1, 2, 3]} spacing={4}>
-        {results.map((item, index) => (
-          <Box
-            key={index}
-            borderWidth="1px"
-            borderRadius="md"
-            overflow="hidden"
-            p={2}
-            textAlign="center"
-            _hover={{ shadow: "md", cursor: "pointer" }}
-          >
-            <Image
-              src={item.pictures?.medium}
-              alt={item.name}
-              width="100%"
-              height="200px"
-              objectFit="cover"
+      <VStack spacing={6} align="stretch">
+        <SimpleGrid columns={[1, 2, 3]} spacing={4}>
+          {results.map((item, index) => (
+            <Box
+              key={index}
+              borderWidth="1px"
               borderRadius="md"
-            />
-            <Text mt={2} fontWeight="bold">
-              {item.name}
-            </Text>
-            <Button
-              mt={2}
-              colorScheme="blue"
-              size="sm"
-              onClick={() => setPlayingTrackId(item.key)}
+              overflow="hidden"
+              p={2}
+              textAlign="center"
+              _hover={{ shadow: "md", cursor: "pointer" }}
             >
-              ▶ Play
-            </Button>
+              <Image
+                src={item.pictures?.medium}
+                alt={item.name}
+                width="100%"
+                height="200px"
+                objectFit="cover"
+                borderRadius="md"
+              />
+              <Text mt={2} fontWeight="bold">
+                {item.name}
+              </Text>
+              <Button
+                mt={2}
+                colorScheme="blue"
+                size="sm"
+                onClick={() => setPlayingTrackId(item.key)}
+              >
+                ▶ Play
+              </Button>
 
-            {playingTrackId === item.key && <TrackPlayer track={item} />}
+              {playingTrackId === item.key && <TrackPlayer track={item} />}
+            </Box>
+          ))}
+        </SimpleGrid>
+
+        {playingTrackId === null && (
+          <Box
+            textAlign="center"
+            color="gray.500"
+            borderWidth="1px"
+            borderStyle="dashed"
+            borderRadius="md"
+            p={4}
+          >
+            🎵 No track selected
           </Box>
-        ))}
-      </SimpleGrid>
+        )}
+      </VStack>
     );
   }
 
-  // List view
+  // List view (unchanged)
   return (
     <VStack spacing={4} align="stretch">
       {results.map((item, index) => (

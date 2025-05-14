@@ -11,9 +11,11 @@ function App() {
   const [results, setResults] = useState([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState("list");
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [playTrack, setPlayTrack] = useState(false);
+  const [view, setView] = useState(() => {
+    return localStorage.getItem("sound_search_view") || "list";
+  });
 
   const handleSearch = async (newQuery) => {
     setQuery(newQuery);
@@ -22,6 +24,11 @@ function App() {
     const data = await searchMixcloud(newQuery, 0);
     setResults(data);
     setLoading(false);
+  };
+
+  const changeView = (newView) => {
+    setView(newView);
+    localStorage.setItem("sound_search_view", newView);
   };
 
   const handleNext = async () => {
@@ -38,17 +45,19 @@ function App() {
     <Container maxW="container.md" py={6}>
       <VStack spacing={6} align="stretch">
         <Heading>Sound Search</Heading>
+
         <SearchBar onSearch={handleSearch} />
+
         <HStack spacing={4} justify="center">
           <Button
             colorScheme={view === "list" ? "blue" : "gray"}
-            onClick={() => setView("list")}
+            onClick={() => changeView("list")}
           >
             List View
           </Button>
           <Button
             colorScheme={view === "tile" ? "blue" : "gray"}
-            onClick={() => setView("tile")}
+            onClick={() => changeView("tile")}
           >
             Tile View
           </Button>
